@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hass-ingress
+  namespace: hass
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`hass.home.bakatrouble.me`)
+    services:
+    - kind: Service
+      name: hass
+      namespace: hass
+      port: 8123
+  tls:
+    certResolver: default

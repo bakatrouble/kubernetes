@@ -1,0 +1,171 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "7"
+  labels:
+    app: immich
+  name: immich
+  namespace: immich
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: immich
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: immich
+    spec:
+      containers:
+      - env:
+        - name: TZ
+          value: Europe/Moscow
+        - name: IMMICH_PORT
+          value: "2283"
+        - name: IMMICH_MACHINE_LEARNING_URL
+          value: http://localhost:3003
+        - name: DB_URL
+          value: postgresql://postgres:postgres@localhost:5432/immich
+        - name: REDIS_HOSTNAME
+          value: localhost
+        image: ghcr.io/immich-app/immich-server:v2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - immich-healthcheck
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: immich-server
+        ports:
+        - containerPort: 2283
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "4"
+            memory: 3096Mi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data
+          name: immich-data-storage
+      - env:
+        - name: TZ
+          value: Europe/Moscow
+        - name: IMMICH_PORT
+          value: "3003"
+        image: ghcr.io/immich-app/immich-machine-learning:v2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - python3
+            - healthcheck.py
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: immich-machine-learning
+        resources:
+          limits:
+            cpu: "4"
+            memory: 3096Mi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /cache
+          name: immich-model-storage
+      - env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: immich
+        - name: POSTGRES_DB
+          value: immich
+        - name: POSTGRES_INITDB_ARGS
+          value: --data-checksums
+        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - pg_isready -U postgres -d immich || exit 1
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: immich-database
+        resources:
+          limits:
+            cpu: "4"
+            memory: 3096Mi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: immich-database-storage
+      - image: docker.io/valkey/valkey:9
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - redis-cli ping || exit 1
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: immich-valkey
+        resources:
+          limits:
+            cpu: "4"
+            memory: 3096Mi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      nodeName: htpc.local
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /mnt/new/immich
+          type: ""
+        name: immich-data-storage
+      - hostPath:
+          path: /mnt/new/immich/model-cache
+          type: ""
+        name: immich-model-storage
+      - hostPath:
+          path: /opt/immich/postgres
+          type: ""
+        name: immich-database-storage

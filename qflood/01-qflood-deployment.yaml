@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "4"
+  labels:
+    app: qflood
+  name: qflood
+  namespace: qflood
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: qflood
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2026-04-25T00:26:51+03:00"
+      labels:
+        app: qflood
+    spec:
+      containers:
+      - env:
+        - name: PUID
+          value: "1001"
+        - name: PGID
+          value: "1001"
+        - name: UMASK
+          value: "002"
+        - name: TZ
+          value: Europe/Moscow
+        - name: LIBTORRENT
+          value: v2
+        - name: FLOOD_AUTH
+          value: "true"
+        image: ghcr.io/engels74/qflood:latest
+        imagePullPolicy: Always
+        name: sillytavern
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 3000
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "4"
+            memory: 3096Mi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /config
+          name: qflood-config-storage
+        - mountPath: /data
+          name: qflood-data-storage
+        - mountPath: /mnt
+          name: qflood-mnt-storage
+      dnsPolicy: ClusterFirst
+      nodeName: htpc.local
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /srv/apps/qflood/config
+          type: ""
+        name: qflood-config-storage
+      - hostPath:
+          path: /srv/apps/qflood/data
+          type: ""
+        name: qflood-data-storage
+      - hostPath:
+          path: /mnt
+          type: ""
+        name: qflood-mnt-storage

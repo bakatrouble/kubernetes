@@ -1,0 +1,37 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: qflood-flood-ingress
+  namespace: qflood
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`flood.home.bakatrouble.me`)
+      services:
+        - kind: Service
+          name: qflood
+          namespace: qflood
+          port: 3000
+  tls:
+    certResolver: default
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: qflood-qb-ingress
+  namespace: qflood
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`qb.home.bakatrouble.me`)
+      services:
+        - kind: Service
+          name: qflood
+          namespace: qflood
+          port: 8080
+  tls:
+    certResolver: default
