@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: vaultwarden
+  name: vaultwarden
+  namespace: vaultwarden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaultwarden
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+    spec:
+      nodeName: htpc.local
+      containers:
+        - env:
+            - name: DOMAIN
+              value: https://vw.home.bakatrouble.me
+          image: vaultwarden/server:latest
+          name: vaultwarden
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "4"
+              memory: 3096Mi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /data/
+              name: vaultwarden-storage
+      volumes:
+        - hostPath:
+            path: /srv/apps/vaultwarden
+          name: vaultwarden-storage
