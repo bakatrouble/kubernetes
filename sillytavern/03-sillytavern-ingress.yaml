@@ -5,14 +5,13 @@ metadata:
   namespace: sillytavern
 spec:
   entryPoints:
-  - websecure
+    - websecure
   routes:
-  - kind: Rule
-    match: Host(`sillytavern.home.bakatrouble.me`)
-    services:
-    - kind: Service
-      name: sillytavern
-      namespace: sillytavern
-      port: 8000
-  tls:
-    certResolver: default
+    - kind: Rule
+      match: Host(`sillytavern.home.bakatrouble.me`)
+      services:
+        - kind: Service
+          name: sillytavern
+          namespace: sillytavern
+          port: 8000
+  tls: {}

@@ -14,5 +14,4 @@ spec:
           name: vaultwarden
           namespace: vaultwarden
           port: 80
-  tls:
-    certResolver: default
+  tls: {}

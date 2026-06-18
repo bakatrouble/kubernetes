@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-home-bakatrouble-me
+  namespace: traefik
+spec:
+  secretName: wildcard-home-bakatrouble-me-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.home.bakatrouble.me"

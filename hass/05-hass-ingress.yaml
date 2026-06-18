@@ -5,14 +5,13 @@ metadata:
   namespace: hass
 spec:
   entryPoints:
-  - websecure
+    - websecure
   routes:
-  - kind: Rule
-    match: Host(`hass.home.bakatrouble.me`)
-    services:
-    - kind: Service
-      name: hass
-      namespace: hass
-      port: 8123
-  tls:
-    certResolver: default
+    - kind: Rule
+      match: Host(`hass.home.bakatrouble.me`)
+      services:
+        - kind: Service
+          name: hass
+          namespace: hass
+          port: 8123
+  tls: {}

@@ -1,17 +1,17 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: immich-ingress
-  namespace: immich
+  name: neko-ingress
+  namespace: neko
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`immich.home.bakatrouble.me`)
+      match: Host(`neko.home.bakatrouble.me`)
       services:
         - kind: Service
-          name: immich
-          namespace: immich
-          port: 2283
+          name: neko
+          namespace: neko
+          port: 8086
   tls: {}

@@ -14,8 +14,7 @@ spec:
           name: qflood
           namespace: qflood
           port: 3000
-  tls:
-    certResolver: default
+  tls: {}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -33,5 +32,4 @@ spec:
           name: qflood
           namespace: qflood
           port: 8080
-  tls:
-    certResolver: default
+  tls: {}
